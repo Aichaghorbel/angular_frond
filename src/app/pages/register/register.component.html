@@ -1,0 +1,116 @@
+<!-- TITRE -->
+<div class="mb-10 text-center">
+  <span class="text-3xl font-black text-slate-900">
+    Créer un compte
+  </span>
+</div>
+
+<!-- FORMULAIRE -->
+<form (submit)="handleSubmit($event)" class="space-y-4">
+
+  <!-- NOM + PSEUDO -->
+  <div class="grid grid-cols-2 gap-3">
+    <input
+      type="text"
+      [(ngModel)]="name"
+      name="name"
+      class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm
+             focus:ring-2 focus:ring-[#478af5] outline-none font-medium"
+      placeholder="Nom"
+      required
+    />
+
+    <input
+      type="text"
+      [(ngModel)]="pseudo"
+      name="pseudo"
+      class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm
+             focus:ring-2 focus:ring-[#478af5] outline-none font-medium"
+      placeholder="Pseudo"
+      required
+    />
+  </div>
+
+  <!-- EMAIL -->
+  <input
+    type="email"
+    [(ngModel)]="email"
+    name="email"
+    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm
+           focus:ring-2 focus:ring-[#478af5] outline-none font-medium"
+    placeholder="Adresse email"
+    required
+  />
+
+  <!-- MOT DE PASSE -->
+  <div class="relative">
+    <input
+      [type]="showPassword ? 'text' : 'password'"
+      [(ngModel)]="password"
+      name="password"
+      class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm
+             focus:ring-2 focus:ring-[#478af5] outline-none font-medium pr-12"
+      placeholder="Mot de passe"
+      required
+    />
+
+    <!-- 🙈 SINGE -->
+    <button
+      type="button"
+      (click)="showPassword = !showPassword"
+      class="absolute inset-y-0 right-0 pr-4 flex items-center text-xl
+             cursor-pointer select-none"
+      title="Afficher / masquer le mot de passe"
+    >
+      {{ showPassword ? '👁️' : '🙈' }}
+    </button>
+  </div>
+
+  <!-- CONFIRMATION -->
+  <div class="relative">
+    <input
+      [type]="showConfirm ? 'text' : 'password'"
+      [(ngModel)]="confirmPassword"
+      name="confirmPassword"
+      class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm
+             focus:ring-2 focus:ring-[#478af5] outline-none font-medium pr-12"
+      placeholder="Confirmation du mot de passe"
+      required
+    />
+
+    <!-- 🙈 SINGE -->
+    <button
+      type="button"
+      (click)="showConfirm = !showConfirm"
+      class="absolute inset-y-0 right-0 pr-4 flex items-center text-xl
+             cursor-pointer select-none"
+      title="Afficher / masquer la confirmation"
+    >
+      {{ showConfirm ? '👁️' : '🙈' }}
+    </button>
+  </div>
+
+  <!-- SUBMIT -->
+  <button
+    type="submit"
+    class="w-full py-3.5 bg-[#478af5] hover:bg-[#3b74cf]
+           text-white rounded-xl text-sm font-bold shadow-lg
+           shadow-blue-900/20 transition-all active:scale-[0.98]"
+  >
+    S’inscrire
+  </button>
+
+</form>
+
+<!-- LIEN LOGIN -->
+<div class="mt-6 text-center">
+  <p class="text-sm text-slate-500 font-medium">
+    Déjà un compte ?
+    <a
+      routerLink="/login"
+      class="text-[#478af5] hover:underline font-bold ml-1"
+    >
+      Se connecter
+    </a>
+  </p>
+</div>

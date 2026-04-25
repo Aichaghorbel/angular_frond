@@ -1,0 +1,315 @@
+.topbar {
+  width: 100%;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.04);
+}
+
+.topbar-container {
+  max-width: 1200px;
+  height: 72px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.brand-main {
+  font-size: 26px;
+  font-weight: 800;
+  color: #2563eb;
+  letter-spacing: 0.2px;
+}
+
+.brand-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Boutons lien */
+.link-btn {
+  text-decoration: none;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.link-btn.primary {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.link-btn.primary:hover {
+  background: #1d4ed8;
+}
+
+.link-btn.secondary {
+  border: 1px solid #d1d5db;
+  color: #111827;
+  background: #ffffff;
+}
+
+.link-btn.secondary:hover {
+  background: #f9fafb;
+}
+
+/* Notifications */
+.notif-box {
+  position: relative;
+}
+
+.notif-btn {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: 0.2s ease;
+}
+
+.notif-btn:hover {
+  background: #e5e7eb;
+}
+
+.notif-btn mat-icon {
+  font-size: 22px;
+  color: #111827;
+}
+
+.notif-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notif-panel {
+  position: absolute;
+  top: 52px;
+  right: 0;
+  width: 320px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.notif-title {
+  padding: 14px 16px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.notif-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f9fafb;
+}
+
+.notif-row:last-child {
+  border-bottom: none;
+}
+
+.notif-message {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #374151;
+}
+
+.notif-delete {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notif-delete mat-icon {
+  font-size: 20px;
+  color: #ef4444;
+}
+
+.notif-empty {
+  padding: 18px;
+  text-align: center;
+  font-size: 14px;
+  color: #6b7280;
+}
+/* ================== USER MENU ================== */
+
+.user-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* bouton utilisateur */
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #ffffff;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+}
+
+.user-chip mat-icon {
+  font-size: 20px;
+}
+
+.user-chip span {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.arrow {
+  font-size: 18px;
+  color: #6b7280;
+}
+
+/* ================== DROPDOWN ================== */
+
+.user-dropdown {
+  position: absolute;
+  top: 46px;
+  right: 0;
+  width: 210px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  padding: 8px 0;
+  z-index: 1000;
+}
+
+/* ================== STATUS ================== */
+
+.user-status {
+  padding: 10px 14px;
+}
+
+.status-title {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  background: #dbeafe;
+  color: #2563eb;
+  font-weight: 600;
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+/* ================== MENU ITEMS ================== */
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.menu-item:hover {
+  background: #f3f4f6;
+}
+
+.menu-item mat-icon {
+  font-size: 20px;
+  color: #111827;
+}
+
+/* LOGOUT */
+.menu-item.logout {
+  color: #dc2626;
+}
+
+.menu-item.logout mat-icon {
+  color: #dc2626;
+}
+
+/* ================== SEPARATOR ================== */
+
+.user-dropdown hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 6px 0;
+}
+
+/* ================== BRAND / LOGO ================== */
+
+.brand {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+
+.brand-logo {
+  height: 56px;      /* ⬅️ AVANT : 42px */
+  width: auto;
+  object-fit: contain;
+}
+
+.topbar-container {
+  max-width: 1200px;
+  height: 72px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;   /* ✅ centré verticalement */
+  justify-content: space-between;
+  box-sizing: border-box;
+}

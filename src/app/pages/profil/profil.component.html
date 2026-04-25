@@ -1,0 +1,301 @@
+<div class="page" *ngIf="user">
+
+  <!-- ================= HEADER PROFIL ================= -->
+  <section class="profile-header">
+    <div class="cover-photo">
+      <img src="assets/images/conv1.png" alt="Cover">
+    </div>
+
+    <div class="header-content">
+      <div class="avatar-wrapper">
+        <div class="avatar-ring">
+          <div class="avatar">
+            <img *ngIf="user.avatar" [src]="user.avatar" alt="Avatar">
+            <span *ngIf="!user.avatar">{{ user.name[0] }}</span>
+          </div>
+        </div>
+        <button
+          mat-icon-button
+          class="avatar-btn"
+          (click)="avatarInput.click()">
+          <mat-icon>photo_camera</mat-icon>
+        </button>
+        <input type="file" hidden #avatarInput>
+      </div>
+
+      <div class="identity">
+        <h1>{{ user.name }}</h1>
+        <span class="role">{{ user.role }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CONTENU ================= -->
+  <section class="profile-content">
+
+    <mat-tab-group animationDuration="0ms" class="custom-tabs">
+
+      <!-- ================= ONGLET INFORMATIONS ================= -->
+      <mat-tab label="Informations">
+        <mat-card class="modern-card">
+
+          <header class="card-header">
+            <h2>Informations personnelles</h2>
+            <p>Modifiez vos informations de base.</p>
+          </header>
+
+          <form (ngSubmit)="updateProfile()" class="modern-form">
+
+            <div class="input-group">
+              <label class="input-label">Nom complet</label>
+              <div class="input-wrap">
+                <mat-icon class="input-icon">person</mat-icon>
+                <input
+                  type="text"
+                  [(ngModel)]="user.name"
+                  name="name"
+                  class="native-input"
+                  placeholder="Votre nom complet">
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">Pseudo</label>
+              <div class="input-wrap">
+                <mat-icon class="input-icon">alternate_email</mat-icon>
+                <input
+                  type="text"
+                  [(ngModel)]="user.pseudo"
+                  name="pseudo"
+                  class="native-input"
+                  placeholder="Votre pseudo">
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">Adresse email</label>
+              <div class="input-wrap">
+                <mat-icon class="input-icon">email</mat-icon>
+                <input
+                  type="email"
+                  [(ngModel)]="user.email"
+                  name="email"
+                  class="native-input"
+                  placeholder="Votre adresse email">
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <button mat-flat-button color="primary" type="submit">
+                <mat-icon>save</mat-icon>
+                Enregistrer les modifications
+              </button>
+            </div>
+
+          </form>
+        </mat-card>
+      </mat-tab>
+
+      <!-- ================= ONGLET PUBLICATIONS ================= -->
+      <mat-tab label="Publications">
+
+        <div *ngIf="loadingPosts" class="loading-state">
+          <div class="spinner"></div>
+          <p>Chargement de vos publications...</p>
+        </div>
+
+        <div *ngIf="!loadingPosts && userPosts.length === 0" class="empty-state modern-empty">
+          <div class="empty-illustration">
+            <mat-icon>edit_note</mat-icon>
+          </div>
+          <h3>Pas encore de publication</h3>
+          <p>Partagez votre première idée avec la communauté.</p>
+          <button mat-flat-button color="primary" routerLink="/home">
+            <mat-icon>add</mat-icon>
+            Créer une publication
+          </button>
+        </div>
+
+        <div *ngIf="!loadingPosts && userPosts.length > 0" class="posts-feed">
+          <div class="posts-header-bar">
+            <span class="posts-count">{{ userPosts.length }} publication{{ userPosts.length > 1 ? 's' : '' }}</span>
+            <button mat-stroked-button color="primary" routerLink="/home">
+              <mat-icon>add</mat-icon>
+              Nouveau
+            </button>
+          </div>
+
+          <article *ngFor="let post of userPosts" class="home-post-card">
+            <!-- HEADER -->
+            <div class="home-post-header">
+              <div class="home-post-user">
+                <div class="home-post-avatar">
+                  {{ (post.user?.pseudo || post.user?.name || user.name)[0] }}
+                </div>
+                <div class="home-post-meta">
+                  <span class="home-post-author">{{ post.user?.pseudo || post.user?.name || user.name }}</span>
+                  <span class="home-post-date">{{ post.created_at | date:'dd MMM yyyy à HH:mm' }}</span>
+                </div>
+              </div>
+
+              <!-- Actions admin -->
+              <div class="post-admin-actions" *ngIf="editingPostId !== post.id">
+                <button mat-icon-button class="action-icon-btn" (click)="startEdit(post)" title="Modifier">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button class="action-icon-btn delete" (click)="deletePost(post)" title="Supprimer">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+
+            <!-- MODE LECTURE -->
+            <ng-container *ngIf="editingPostId !== post.id">
+              <h3 class="home-post-title">{{ post.titre }}</h3>
+              <p class="home-post-content">{{ post.contenu }}</p>
+              <img *ngIf="post.image" [src]="post.image" class="home-post-image" alt="Image">
+            </ng-container>
+
+            <!-- MODE ÉDITION -->
+            <div *ngIf="editingPostId === post.id" class="edit-form">
+              <div class="input-group">
+                <label class="input-label">Titre</label>
+                <input type="text" [(ngModel)]="editTitre" class="native-input" placeholder="Titre de la publication">
+              </div>
+              <div class="input-group">
+                <label class="input-label">Contenu</label>
+                <textarea [(ngModel)]="editContenu" class="native-input textarea" rows="4" placeholder="Contenu de la publication"></textarea>
+              </div>
+              <div class="edit-actions">
+                <button mat-stroked-button (click)="cancelEdit()">Annuler</button>
+                <button mat-flat-button color="primary" (click)="saveEdit(post)">
+                  <mat-icon>save</mat-icon>
+                  Enregistrer
+                </button>
+              </div>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="home-post-footer" *ngIf="editingPostId !== post.id">
+              <div class="home-post-category" *ngIf="post.category">
+                <span class="home-category-badge">{{ post.category }}</span>
+              </div>
+            </div>
+          </article>
+        </div>
+
+      </mat-tab>
+
+      <!-- ================= ONGLET SÉCURITÉ ================= -->
+      <mat-tab label="Sécurité">
+
+        <div class="security-layout">
+
+          <!-- Card Mot de passe -->
+          <mat-card class="modern-card security-card">
+            <div class="security-icon-header">
+              <div class="sec-icon blue">
+                <mat-icon>shield</mat-icon>
+              </div>
+              <div class="sec-titles">
+                <h2>Mot de passe</h2>
+                <p>Mettez à jour votre mot de passe pour sécuriser votre compte.</p>
+              </div>
+            </div>
+
+            <form (ngSubmit)="updatePassword()" class="modern-form">
+
+              <div class="input-group">
+                <label class="input-label">Nouveau mot de passe</label>
+                <div class="input-wrap">
+                  <mat-icon class="input-icon">lock</mat-icon>
+                  <input
+                    [type]="hidePassword ? 'password' : 'text'"
+                    [(ngModel)]="password"
+                    name="password"
+                    (input)="checkStrength()"
+                    class="native-input"
+                    placeholder="Nouveau mot de passe">
+                  <button
+                    type="button"
+                    class="toggle-eye"
+                    (click)="hidePassword = !hidePassword">
+                    <mat-icon>
+                      {{ hidePassword ? 'visibility' : 'visibility_off' }}
+                    </mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Force du mot de passe -->
+              <div class="strength-meter" *ngIf="password">
+                <div class="strength-bar">
+                  <span class="strength-fill" [style.width.%]="passwordStrength" [class]="strengthClass"></span>
+                </div>
+                <span class="strength-label" [class]="strengthClass + '-text'">{{ strengthLabel }}</span>
+              </div>
+
+              <div class="input-group">
+                <label class="input-label">Confirmation du mot de passe</label>
+                <div class="input-wrap">
+                  <mat-icon class="input-icon">lock_outline</mat-icon>
+                  <input
+                    [type]="hideConfirm ? 'password' : 'text'"
+                    [(ngModel)]="password_confirmation"
+                    name="password_confirmation"
+                    class="native-input"
+                    placeholder="Confirmez le mot de passe">
+                  <button
+                    type="button"
+                    class="toggle-eye"
+                    (click)="hideConfirm = !hideConfirm">
+                    <mat-icon>
+                      {{ hideConfirm ? 'visibility' : 'visibility_off' }}
+                    </mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <div class="card-actions">
+                <button mat-flat-button color="primary" type="submit">
+                  <mat-icon>lock_reset</mat-icon>
+                  Modifier le mot de passe
+                </button>
+              </div>
+
+            </form>
+          </mat-card>
+
+          <!-- Card Zone de danger -->
+          <mat-card class="modern-card danger-card">
+            <div class="security-icon-header">
+              <div class="sec-icon red">
+                <mat-icon>warning</mat-icon>
+              </div>
+              <div class="sec-titles">
+                <h2>Zone de danger</h2>
+                <p>Actions irréversibles sur votre compte.</p>
+              </div>
+            </div>
+
+            <div class="danger-body">
+              <div class="danger-info">
+                <h4>Supprimer le compte</h4>
+                <p>Cette action est définitive. Toutes vos données et publications seront supprimées.</p>
+              </div>
+              <button mat-stroked-button color="warn">
+                <mat-icon>delete_forever</mat-icon>
+                Supprimer mon compte
+              </button>
+            </div>
+          </mat-card>
+
+        </div>
+
+      </mat-tab>
+
+    </mat-tab-group>
+
+  </section>
+</div>
+

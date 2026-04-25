@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Override Angular Material mat-typography which resets font-weight on headings */
+.mat-typography h1,
+.mat-typography h2,
+.mat-typography h3,
+.mat-typography h4,
+.mat-typography h5,
+.mat-typography h6 {
+  font-weight: inherit;
+}
+
+/* styles.css */
+:root {
+  --primary: #478af5;
+  --background: #f8fafc;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* =========================================
+   FIX DEFINITIF : ANGULAR MATERIAL + TAILWIND
+   ========================================= */
+
+/* Empêche Tailwind de casser le layout Material */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Mat form field largeur réelle */
+.mat-form-field {
+  width: 100% ;
+}
+
+/* Corrige le wrapper interne */
+.mat-form-field-wrapper {
+  width: 100% ;
+  padding-bottom: 0 ;
+}
+
+/* Corrige l’outline coupé */
+.mat-form-field-outline {
+  width: 100% ;
+}
+
+/* Corrige l’input interne */
+.mat-input-element {
+  width: 100% ;
+  padding: 0.75rem 0.75rem ;
+  box-sizing: border-box ;
+}
+
+/* Focus */
+.mat-form-field.mat-focused .mat-form-field-outline-thick {
+  color: var(--primary) ;
+}
+
+/* Labels */
+.mat-form-field-label {
+  color: #64748b ;
+}
+
+/* Boutons Material */
+button.mat-flat-button,
+button.mat-stroked-button {
+  border-radius: 8px ;
+  font-weight: 500;
+}

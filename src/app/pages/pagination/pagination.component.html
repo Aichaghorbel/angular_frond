@@ -1,0 +1,33 @@
+<nav class="flex items-center justify-between px-6 py-4 bg-white border-t border-slate-100" aria-label="Table navigation">
+  <div class="text-sm text-slate-500">
+    Page <span class="font-bold text-slate-900">{{ currentPage }}</span> sur <span class="font-bold text-slate-900">{{ totalPages || 1 }}</span>
+  </div>
+  
+  <ul class="inline-flex items-center gap-2">
+    <li>
+      <button
+        (click)="goToPage(currentPage - 1)"
+        [disabled]="currentPage === 1"
+        class="w-9 h-9 flex items-center justify-center rounded-full border border-blue-100 text-slate-400 bg-white hover:bg-blue-50 hover:text-[#478af5] hover:border-[#478af5] disabled:opacity-30 disabled:pointer-events-none transition-all shadow-sm"
+      >
+        <lucide-icon name="chevron-left" class="w-4 h-4"></lucide-icon>
+      </button>
+    </li>
+
+    <li>
+      <div class="w-9 h-9 flex items-center justify-center rounded-full bg-blue-50 text-[#478af5] font-black border border-blue-200 shadow-sm">
+        {{ currentPage }}
+      </div>
+    </li>
+
+    <li>
+      <button
+        (click)="goToPage(currentPage + 1)"
+        [disabled]="currentPage === totalPages || totalPages === 0"
+        class="w-9 h-9 flex items-center justify-center rounded-full border border-blue-100 text-slate-400 bg-white hover:bg-blue-50 hover:text-[#478af5] hover:border-[#478af5] disabled:opacity-30 disabled:pointer-events-none transition-all shadow-sm"
+      >
+        <lucide-icon name="chevron-right" class="w-4 h-4"></lucide-icon>
+      </button>
+    </li>
+  </ul>
+</nav>

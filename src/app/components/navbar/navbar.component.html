@@ -1,0 +1,114 @@
+<header class="topbar">
+  <div class="topbar-container">
+
+    <!-- LOGO -->
+    <a [routerLink]="user ? '/home' : '/'" class="brand">
+      <img src="assets/2.png" alt="HIDETALK" class="brand-logo"/>
+    </a>
+
+    <!-- CONNECTÉ -->
+    <div class="topbar-right" *ngIf="user">
+
+      <!-- NOTIFICATIONS -->
+      <div class="notif-box">
+        <button type="button" class="notif-btn"
+                (click)="toggleNotifMenu()">
+          <mat-icon>notifications_none</mat-icon>
+
+          <span class="notif-count" *ngIf="notifications.length > 0">
+            {{ notifications.length }}
+          </span>
+        </button>
+
+        <div class="notif-panel" *ngIf="notifOpen">
+          <div class="notif-title">Notifications</div>
+
+          <ng-container *ngIf="notifications.length > 0; else noNotif">
+            <div class="notif-row"
+                 *ngFor="let n of notifications">
+
+              <mat-icon>
+                {{ n.type === 'like' ? 'thumb_up' : 'comment' }}
+              </mat-icon>
+
+              <div class="notif-content">
+              <strong>{{ n.from_user_name || 'Utilisateur' }}</strong>
+
+              <span *ngIf="n.type === 'like'">
+                a aimé votre post
+                <em>"{{ n.post_title }}"</em>
+              </span>
+
+              <span *ngIf="n.type === 'comment'">
+                a commenté votre post
+                <em>"{{ n.post_title }}"</em>
+              </span>
+            </div>
+
+
+              <button class="notif-delete"
+                      (click)="deleteNotif(n.id)">
+                <mat-icon>close</mat-icon>
+              </button>
+
+            </div>
+          </ng-container>
+
+          <ng-template #noNotif>
+            <div class="notif-empty">Aucune notification</div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- MENU UTILISATEUR -->
+      <div class="user-menu">
+        <div class="user-chip" (click)="toggleUserMenu()">
+          <mat-icon>account_circle</mat-icon>
+          <span>{{ user.pseudo || user.name }}</span>
+          <mat-icon class="arrow">expand_more</mat-icon>
+        </div>
+
+        <div class="user-dropdown" *ngIf="userMenuOpen">
+
+          <div class="user-status">
+            <div class="status-title">MON STATUT</div>
+            <span class="status-badge">
+              {{ user.role | titlecase }}
+            </span>
+          </div>
+
+          <hr>
+
+          <div class="menu-item" (click)="goToProfile()">
+  <mat-icon>person</mat-icon>
+  Profil
+</div>
+
+          <!-- HISTORIQUE -->
+          <div class="menu-item"
+              routerLink="/history"
+              (click)="closeUserMenu()">
+            <mat-icon>history</mat-icon>
+            Historique
+          </div>
+
+
+          <div class="menu-item logout"
+               (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            Déconnexion
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- GUEST (hors du *ngIf user) -->
+    <div class="topbar-right" *ngIf="!user">
+      <a routerLink="/login" class="link-btn primary">Connexion</a>
+      <a routerLink="/register" class="link-btn secondary">Inscription</a>
+    </div>
+
+  </div>
+</header>

@@ -1,0 +1,66 @@
+<div class="history-page">
+
+  <mat-card class="history-card">
+
+    <!-- HEADER -->
+    <div class="history-header">
+      <mat-icon class="header-icon">history</mat-icon>
+      <div>
+        <h2>Mon historique</h2>
+        <p>Suivi de vos activités sur le forum</p>
+      </div>
+    </div>
+
+    <!-- COMMENTAIRES -->
+    <section class="history-section">
+      <h3>💬 Mes commentaires</h3>
+
+      <div *ngIf="comments.length === 0" class="empty-state">
+        Aucun commentaire publié.
+      </div>
+
+      <div *ngFor="let c of comments" class="history-item">
+        <div class="item-icon comment">
+          <mat-icon>chat</mat-icon>
+        </div>
+
+        <div class="item-content">
+          <div class="item-text">"{{ c.contenu }}"</div>
+          <div class="item-meta">
+            Sur <strong>{{ c.post?.titre }}</strong> ·
+            {{ c.created_at | date:'dd/MM/yyyy HH:mm' }}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <mat-divider></mat-divider>
+
+    <!-- LIKES -->
+    <section class="history-section">
+      <h3>👍 Mes likes</h3>
+
+      <div *ngIf="likes.length === 0" class="empty-state">
+        Aucun like effectué.
+      </div>
+
+      <div *ngFor="let l of likes" class="history-item">
+        <div class="item-icon like">
+          <mat-icon>thumb_up</mat-icon>
+        </div>
+
+        <div class="item-content">
+          <div class="item-text">
+            Vous avez aimé le post
+            <strong>{{ l.post?.titre }}</strong>
+          </div>
+          <div class="item-meta">
+            {{ l.created_at | date:'dd/MM/yyyy HH:mm' }}
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </mat-card>
+
+</div>
