@@ -10,3 +10,12 @@
 </div>
 
 <app-footer *ngIf="showNavFooter"></app-footer>
+
+<!-- Bouton retour global -->
+<button
+  type="button"
+  class="global-back-btn"
+  (click)="goBack()"
+  title="Retour">
+  <mat-icon>arrow_back</mat-icon>
+</button>

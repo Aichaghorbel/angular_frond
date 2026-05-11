@@ -1,171 +1,158 @@
-.forum-footer {
-  background: #f8fafc;
-  color: #1e293b;
-  margin-top: 40px;
-  border-top: 1px solid #e2e8f0;
+.ff {
+  background: #0f172a;
+  border-top: 0.5px solid #1e293b;
+  padding: 2.5rem 2rem 1.5rem;
 }
 
-.container {
-  max-width: 1100px;
-  margin: auto;
-  padding: 30px 20px;
-}
-
-/* TOP */
-.footer-top {
-  margin-bottom: 25px;
-}
-
-.footer-brand {
+/* BRAND */
+.ff-brand {
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-bottom: 2rem;
 }
 
-.footer-brand .logo {
-  font-size: 22px;
-  color: #2563eb;
+.ff-brand-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: #1e3a5f;
+  border: 0.5px solid rgba(37, 99, 235, 0.27);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.footer-brand h2 {
-  margin: 0;
+.ff-brand-icon i {
   font-size: 20px;
+  color: #60a5fa;
 }
 
-.footer-brand p {
-  margin: 2px 0 0;
+.ff-brand-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.ff-brand-sub {
   font-size: 13px;
   color: #64748b;
+  margin: 2px 0 0;
 }
 
 /* GRID */
-.footer-grid {
+.ff-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  margin-bottom: 25px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-bottom: 2rem;
 }
 
-.footer-col h4 {
+/* COLUMN LABEL */
+.ff-col-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #3b82f6;
+  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ff-col-label i {
   font-size: 14px;
-  margin-bottom: 10px;
-  color: #2563eb;
 }
 
-.footer-col h4 i {
-  margin-right: 6px;
-}
-
-.footer-col p {
-  font-size: 13px;
-  color: #64748b;
+.ff-col-desc {
+  font-size: 14px;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.6;
 }
 
 /* LIST */
-.footer-col ul {
+.ff-col ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.footer-col li {
-  font-size: 13px;
-  margin-bottom: 6px;
-  color: #475569;
+.ff-col li {
+  margin-bottom: 9px;
 }
 
-.footer-col a {
+.ff-col a {
+  font-size: 14px;
+  color: #94a3b8;
   text-decoration: none;
-  color: #475569;
+  transition: color 0.15s;
 }
 
-.footer-col a:hover {
-  color: #2563eb;
+.ff-col a:hover {
+  color: #60a5fa;
 }
 
-/* BUTTONS */
-.footer-buttons {
+/* RULES */
+.ff-rule-item {
   display: flex;
-  gap: 8px;
-  flex-direction: column;
-}
-
-.btn {
-  padding: 8px;
-  text-align: center;
-  border-radius: 6px;
-  font-size: 13px;
-  text-decoration: none;
-}
-
-.primary {
-  background: #2563eb;
-  color: white;
-}
-
-.secondary {
-  background: #e2e8f0;
-  color: #2563eb;
-}
-.footer-buttons {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.footer-buttons .btn {
-  display: inline-flex;     
-  width: fit-content;      
-  padding: 6px 12px;
-  height: auto;             
-  
   align-items: center;
   gap: 8px;
-
-  border-radius: 6px;
+  font-size: 14px;
+  color: #94a3b8;
+  margin-bottom: 9px;
 }
-/* BOTTOM */
-.footer-buttons a {
+
+.ff-rule-item i {
+  font-size: 15px;
+  color: #3b82f6;
+}
+
+/* DIVIDER */
+.ff-divider {
+  border: none;
+  border-top: 0.5px solid #1e293b;
+  margin: 0 0 1.25rem;
+}
+
+.ff-bottom {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  padding: 0 2rem;
 }
 
-.footer-buttons i {
-  font-size: 14px;
-}
-.footer-icons i {
-  margin-left: 10px;
-  color: #2563eb;
-}
-.footer-bottom {
-  display: flex;
-  justify-content: center;   /* centre horizontalement */
-  align-items: center;       /* centre verticalement */
-  text-align: center;
-  width: 100%;
-  padding-top: 14px;
-  margin-top: 10px;
-  border-top: 1px solid #e2e8f0;
-}
-
-.footer-bottom p {
-  margin: 0;
-  width: 100%;
-  text-align: center;
+.ff-bottom-copy {
   font-size: 13px;
-  color: #64748b;
+  color: #475569;
+  margin: 0;
+  text-align: center;
+  width: 100%;
 }
+
+.ff-bottom-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #64748b;
+  background: #1e293b;
+  border: 0.5px solid #334155;
+  border-radius: 8px;
+  padding: 4px 10px;
+}
+
+.ff-bottom-badge i {
+  font-size: 13px;
+  color: #22c55e;
+}
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
-  .footer-grid {
+  .ff-grid {
     grid-template-columns: 1fr 1fr;
   }
 
-  .footer-bottom {
-    flex-direction: column;
-    gap: 10px;
-  }
 }

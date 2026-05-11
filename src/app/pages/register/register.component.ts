@@ -18,6 +18,13 @@ export class RegisterComponent {
   showPassword = false;
   showConfirm = false;
 
+  // Validation en temps réel
+  nameError = '';
+  pseudoError = '';
+  emailError = '';
+  passwordError = '';
+  confirmError = '';
+
   // Password strength
   passwordStrength = 0;
   strengthClass = '';
@@ -27,6 +34,49 @@ export class RegisterComponent {
     private auth: AuthService,
     private router: Router
   ) {}
+
+  // =========================
+  // VALIDATION CHAMP PAR CHAMP
+  // =========================
+  validateName(): void {
+    this.nameError = !this.name.trim() ? 'Le nom est obligatoire.' : '';
+  }
+
+  validatePseudo(): void {
+    this.pseudoError = !this.pseudo.trim() ? 'Le pseudo est obligatoire.' : '';
+  }
+
+  validateEmail(): void {
+    if (!this.email.trim()) {
+      this.emailError = "L'email est obligatoire.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email.trim())) {
+      this.emailError = "L'adresse email n'est pas valide.";
+    } else {
+      this.emailError = '';
+    }
+  }
+
+  validatePassword(): void {
+    if (!this.password) {
+      this.passwordError = 'Le mot de passe est obligatoire.';
+    } else if (this.password.length < 6) {
+      this.passwordError = 'Le mot de passe doit contenir au moins 6 caractères.';
+    } else {
+      this.passwordError = '';
+    }
+    this.checkStrength();
+    if (this.confirmPassword) this.validateConfirm();
+  }
+
+  validateConfirm(): void {
+    if (!this.confirmPassword) {
+      this.confirmError = 'La confirmation est obligatoire.';
+    } else if (this.password !== this.confirmPassword) {
+      this.confirmError = 'Les mots de passe ne correspondent pas.';
+    } else {
+      this.confirmError = '';
+    }
+  }
 
   checkStrength(): void {
     const pwd = this.password;
@@ -63,16 +113,27 @@ export class RegisterComponent {
     }
   }
 
+  // Vérifie si un champ est rempli (pour le style rouge)
+  isFieldEmpty(value: string): boolean {
+    return value.trim() === '';
+  }
+
   handleSubmit(event: Event): void {
     event.preventDefault();
-    
-    if (!this.name || !this.pseudo || !this.email || !this.password) {
-      this.error.set('Veuillez remplir tous les champs');
-      return;
-    }
 
-    if (this.password !== this.confirmPassword) {
-      this.error.set('Les mots de passe ne correspondent pas');
+    // Valider tous les champs avant envoi
+    this.validateName();
+    this.validatePseudo();
+    this.validateEmail();
+    this.validatePassword();
+    this.validateConfirm();
+
+    // Arrêter si erreurs locales
+    if (
+      this.nameError || this.pseudoError ||
+      this.emailError || this.passwordError || this.confirmError
+    ) {
+      this.error.set('Veuillez corriger les erreurs ci-dessus.');
       return;
     }
 
@@ -80,9 +141,9 @@ export class RegisterComponent {
     this.isSubmitting.set(true);
 
     const payload = {
-      name: this.name,
-      pseudo: this.pseudo,
-      email: this.email,
+      name: this.name.trim(),
+      pseudo: this.pseudo.trim(),
+      email: this.email.trim(),
       password: this.password,
       password_confirmation: this.confirmPassword
     };
@@ -94,11 +155,34 @@ export class RegisterComponent {
       },
       error: (err: any) => {
         this.isSubmitting.set(false);
+
+        // Erreurs de validation Laravel (422)
         if (err?.error?.errors) {
-          const firstError = Object.values(err.error.errors)[0] as string[];
-          this.error.set(firstError[0]);
+          const errors = err.error.errors;
+
+          if (errors.email) {
+            this.emailError = 'Cet email est déjà utilisé.';
+            this.error.set('Cet email est déjà utilisé par un autre compte.');
+          } else if (errors.pseudo) {
+            this.pseudoError = 'Ce pseudo est déjà pris.';
+            this.error.set('Ce pseudo est déjà utilisé par un autre compte.');
+          } else {
+            const firstError = Object.values(errors)[0] as string[];
+            this.error.set(firstError[0]);
+          }
+          return;
+        }
+
+        // Erreur générique backend
+        const msg = err?.error?.message || err?.error?.error || '';
+        if (/email/i.test(msg)) {
+          this.emailError = 'Cet email est déjà utilisé.';
+          this.error.set('Cet email est déjà utilisé par un autre compte.');
+        } else if (/pseudo/i.test(msg)) {
+          this.pseudoError = 'Ce pseudo est déjà pris.';
+          this.error.set('Ce pseudo est déjà utilisé.');
         } else {
-          this.error.set(err?.error?.error || err?.error?.message || "Erreur lors de l'inscription");
+          this.error.set(msg || "Erreur lors de l'inscription. Veuillez réessayer.");
         }
       }
     });

@@ -83,8 +83,8 @@
   right: 4px;
   background: #ffffff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -92,6 +92,8 @@
   border: none;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: visible;
+  padding: 0;
 }
 
 .avatar-btn:hover {
@@ -100,8 +102,14 @@
 }
 
 .avatar-btn mat-icon {
-  font-size: 18px;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
   color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
 }
 
 /* ===== IDENTITY ===== */
@@ -499,8 +507,8 @@
 }
 
 .action-icon-btn {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: none;
   background: transparent;
@@ -510,6 +518,8 @@
   align-items: center;
   justify-content: center;
   transition: background 0.2s ease, color 0.2s ease;
+  overflow: visible;
+  padding: 0;
 }
 
 .action-icon-btn:hover {
@@ -526,6 +536,10 @@
   font-size: 20px;
   width: 20px;
   height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
 }
 
 /* Content */
@@ -904,4 +918,3 @@
     height: 20px;
   }
 }
-

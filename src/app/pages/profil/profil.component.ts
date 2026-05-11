@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { PostService } from '../../services/post.service';
+import { CategoryFilterService } from '../../services/category-filter.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
@@ -37,7 +39,9 @@ export class ProfilComponent implements OnInit {
   constructor(
     private auth: AuthService,
     private postService: PostService,
-    private http: HttpClient
+    private http: HttpClient,
+    private router: Router,
+    private categoryFilter: CategoryFilterService
   ) {}
 
   ngOnInit(): void {
@@ -59,17 +63,17 @@ export class ProfilComponent implements OnInit {
   }
 
   // ✅ UPDATE PROFILE
-  updateProfile() {
-    this.http.put(
-      `${environment.apiUrl}/profile`,
-      {
-        name: this.user.name,
-        pseudo: this.user.pseudo,
-        email: this.user.email
-      },
-      this.getHeaders()
-    ).subscribe(() => alert('Profil mis à jour'));
-  }
+ updateProfile() {
+  this.http.put(
+    `${environment.apiUrl}/profile`,
+    {
+      name: this.user.name,
+      pseudo: this.user.pseudo
+      // ✅ email retiré
+    },
+    this.getHeaders()
+  ).subscribe(() => alert('Profil mis à jour'));
+}
 
   // ✅ UPDATE PASSWORD
   updatePassword() {
@@ -164,5 +168,12 @@ export class ProfilComponent implements OnInit {
       },
       error: () => alert('Erreur lors de la suppression')
     });
+  }
+
+  goToCategory(categoryId?: number): void {
+    if (categoryId == null) return;
+    this.categoryFilter.setCategory(categoryId);
+    this.categoryFilter.openPostForm(categoryId);
+    this.router.navigate(['/home']);
   }
 }

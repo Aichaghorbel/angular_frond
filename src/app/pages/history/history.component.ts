@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
+import { CategoryFilterService } from '../../services/category-filter.service';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -17,7 +19,9 @@ export class HistoryComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private auth: AuthService
+    private auth: AuthService,
+    private router: Router,
+    private categoryFilter: CategoryFilterService
   ) {}
 
   ngOnInit(): void {
@@ -39,5 +43,12 @@ export class HistoryComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  goToCategory(categoryId?: number): void {
+    if (categoryId == null) return;
+    this.categoryFilter.setCategory(categoryId);
+    this.categoryFilter.openPostForm(categoryId);
+    this.router.navigate(['/home']);
   }
 }

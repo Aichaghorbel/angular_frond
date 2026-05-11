@@ -22,6 +22,9 @@ export class CategoryFilterService {
   private selectedCategorySubject = new BehaviorSubject<Categorie | null>(null);
   selectedCategory$ = this.selectedCategorySubject.asObservable();
 
+  private openPostFormSubject = new BehaviorSubject<{ open: boolean; categoryId?: number }>({ open: false });
+  openPostForm$ = this.openPostFormSubject.asObservable();
+
   constructor(private http: HttpClient) {}
 
   getCategories(): Observable<Categorie[]> {
@@ -38,6 +41,14 @@ export class CategoryFilterService {
 
   getSelectedCategory(): Categorie | null {
     return this.selectedCategorySubject.value;
+  }
+
+  openPostForm(categoryId?: number): void {
+    this.openPostFormSubject.next({ open: true, categoryId });
+  }
+
+  clearPostFormIntent(): void {
+    this.openPostFormSubject.next({ open: false });
   }
 
   addCategorie(categorie: Categorie): Observable<Categorie> {

@@ -15,6 +15,10 @@ export class AdminCategoriesComponent implements OnInit {
   isEditing = false;
   isIconDropdownOpen = false;
 
+  // Delete Modal Signals
+  isDeleteModalOpen = false;
+  categoryIdToDelete: number | null = null;
+
   availableIcons = [
     'label', 'star', 'favorite', 'home', 'work', 'school', 'science', 'computer',
     'language', 'public', 'bolt', 'eco', 'pets', 'restaurant', 'movie', 'music_note',
@@ -26,12 +30,12 @@ export class AdminCategoriesComponent implements OnInit {
   ];
 
   availableColors = [
-    '#1d4b99', '#00b1ba', '#ef4444', '#10b981', '#f59e0b', '#6366f1', '#8b5cf6', 
+    '#478af5', '#00b1ba', '#ef4444', '#10b981', '#f59e0b', '#6366f1', '#8b5cf6', 
     '#ec4899', '#64748b', '#22c55e', '#3b82f6', '#f43f5e', '#a855f7', '#06b6d4'
   ];
 
   currentPage = 1;
-  pageSize = 5;
+  pageSize = 4;
 
   get totalPages() {
     return Math.ceil(this.filteredCategoriesCount / this.pageSize);
@@ -69,7 +73,7 @@ export class AdminCategoriesComponent implements OnInit {
     titre: '',
     description: '',
     icon: '',
-    color: '#1d4b99'
+    color: '#478af5'
   };
 
 
@@ -94,7 +98,7 @@ export class AdminCategoriesComponent implements OnInit {
       titre: '',
       description: '',
       icon: '',
-      color: '#1d4b99'
+      color: '#478af5'
     };
     this.isModalOpen = true;
   }
@@ -144,15 +148,23 @@ export class AdminCategoriesComponent implements OnInit {
     }
   }
 
-  deleteCategory(id: number) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
-      this.categoryService.deleteCategorie(id).subscribe({
-        next: () => this.loadCategories(),
-        error: (err) => console.error('Erreur lors de la suppression', err)
-      });
-    }
+  openDeleteModal(id: number) {
+    this.categoryIdToDelete = id;
+    this.isDeleteModalOpen = true;
+  }
+
+  confirmDeleteCategory(id: number) {
+    this.categoryService.deleteCategorie(id).subscribe({
+      next: () => {
+        this.loadCategories();
+        this.isDeleteModalOpen = false;
+        this.categoryIdToDelete = null;
+      },
+      error: (err) => {
+        console.error('Erreur lors de la suppression', err);
+        this.isDeleteModalOpen = false;
+        this.categoryIdToDelete = null;
+      }
+    });
   }
 }
-
-
-

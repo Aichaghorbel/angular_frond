@@ -10,10 +10,9 @@ import { Router } from '@angular/router';
 export class LoginComponent {
   email = '';
   password = '';
+  showPassword = false;
   error = signal('');
   isSubmitting = signal(false);
-  showPassword = false;
-showConfirm = false;
 
   constructor(
     private auth: AuthService,
@@ -46,8 +45,13 @@ showConfirm = false;
       },
       error: (err) => {
         this.isSubmitting.set(false);
-        this.error.set(err?.error?.error || err?.error?.message || 'Email ou mot de passe incorrect');
+        if (err.status === 403 && err.error?.error === 'Compte suspendu') {
+          this.router.navigate(['/suppension'], { queryParams: { reason: err.error.reason } });
+        } else {
+          this.error.set(err?.error?.error || err?.error?.message || 'Email ou mot de passe incorrect');
+        }
       }
     });
   }
 }
+

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Location } from '@angular/common';
 import { AuthService } from './services/auth.service';
 import { CategoryFilterService } from './services/category-filter.service';
 import { Router, NavigationEnd } from '@angular/router';
@@ -18,14 +19,15 @@ export class AppComponent implements OnInit {
   constructor(
     private auth: AuthService,
     private categoryFilter: CategoryFilterService,
-    private router: Router
+    private router: Router,
+    private location: Location
   ) {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
       const url = event.urlAfterRedirects;
       this.isAdminPage = url.startsWith('/admin');
-      this.showNavFooter = !this.isAdminPage && !url.startsWith('/moderateur') && !url.startsWith('/login') && !url.startsWith('/register');
+      this.showNavFooter = !this.isAdminPage && !url.startsWith('/moderateur') && !url.startsWith('/suppension');
     });
   }
 
@@ -37,5 +39,9 @@ export class AppComponent implements OnInit {
 
   onCategorySelected(categoryId: number | null): void {
     this.categoryFilter.setCategory(categoryId);
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

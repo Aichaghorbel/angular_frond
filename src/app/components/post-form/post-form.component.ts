@@ -10,6 +10,7 @@ export class PostFormComponent implements OnChanges {
   @Input() categories: any[] = [];
   @Input() posting = false;
   @Input() error = '';
+  @Input() selectedCategoryId: number | null = null;
 
   @Output() submitPost = new EventEmitter<{
     titre: string;
@@ -30,7 +31,9 @@ export class PostFormComponent implements OnChanges {
   selectedFileName = '';
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['categories'] && this.categories.length > 0 && !this.postData.categorie_id) {
+    if (changes['selectedCategoryId'] && this.selectedCategoryId != null) {
+      this.postData.categorie_id = this.selectedCategoryId;
+    } else if (changes['categories'] && this.categories.length > 0 && !this.postData.categorie_id) {
       this.postData.categorie_id = this.categories[0].id;
     }
   }

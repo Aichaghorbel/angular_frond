@@ -27,8 +27,14 @@
         <div class="item-content">
           <div class="item-text">"{{ c.contenu }}"</div>
           <div class="item-meta">
-            Sur <strong>{{ c.post?.titre }}</strong> ·
-            {{ c.created_at | date:'dd/MM/yyyy HH:mm' }}
+            Sur <strong>{{ c.post?.titre }}</strong>
+            <span *ngIf="c.post?.categorie?.titre || c.post?.category"
+                  class="history-cat-badge"
+                  [class.clickable]="c.post?.categorie?.id || c.post?.categorie_id"
+                  (click)="goToCategory(c.post?.categorie?.id || c.post?.categorie_id)">
+              {{ c.post?.categorie?.titre || c.post?.category }}
+            </span>
+            · {{ c.created_at | date:'dd/MM/yyyy HH:mm' }}
           </div>
         </div>
       </div>
@@ -55,6 +61,12 @@
             <strong>{{ l.post?.titre }}</strong>
           </div>
           <div class="item-meta">
+            <span *ngIf="l.post?.categorie?.titre || l.post?.category"
+                  class="history-cat-badge"
+                  [class.clickable]="l.post?.categorie?.id || l.post?.categorie_id"
+                  (click)="goToCategory(l.post?.categorie?.id || l.post?.categorie_id)">
+              {{ l.post?.categorie?.titre || l.post?.category }}
+            </span>
             {{ l.created_at | date:'dd/MM/yyyy HH:mm' }}
           </div>
         </div>

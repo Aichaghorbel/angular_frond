@@ -25,6 +25,7 @@ import { NavbarComponent } from './components/navbar/navbar.component';
 import { PostFormComponent } from './components/post-form/post-form.component';
 import { CategoryBarComponent } from './components/CategoryBar/CategoryBarComponent';
 
+
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatCardModule } from '@angular/material/card';
@@ -39,11 +40,17 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { FooterComponent } from './pages/footer/footer.component';
 import { AdminDashboardComponent } from './pages/admin-dashboard/admin-dashboard.component';
-import { LucideAngularModule, Users, Newspaper, FolderTree, MessageSquare, MessageSquareLock, Shield, File, Calendar, Coins, XCircle, Search, SearchX, Filter, ChevronDown, ChevronLeft, ChevronRight, CheckCircle, Eye, EyeOff, Lock, Unlock, X, Mail, Plus, Edit, Trash2, UserMinus, User, Settings, LogOut, RotateCw, Flag, ThumbsUp, ThumbsDown } from 'lucide-angular';
+import { LucideAngularModule, Users, Newspaper, FolderTree, MessageSquare, MessageSquareLock, Shield, File, Calendar, Coins, XCircle, Search, SearchX, Filter, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CheckCircle, Eye, EyeOff, Lock, Unlock, X, Mail, Plus, Edit, Trash2, UserMinus, UserCheck, User, Settings, LogOut, RotateCw, Flag, ThumbsUp, ThumbsDown, AlertCircle, Quote, ArrowLeft, ShieldOff, ShieldAlert, UserX } from 'lucide-angular';
 import { PostesMComponent } from './pages/postes-m/postes-m.component';
 import { ModerateurLayoutComponent } from './pages/moderateur-layout/moderateur-layout.component';
+import { SuppComponent } from './pages/supp/supp.component';
+import { SuppCommentaireComponent } from './supp-commentaire/supp-commentaire.component';
+import { SuppensionComponent } from './suppension/suppension.component';
+import { SuppCatComponent } from './supp-cat/supp-cat.component';
 import { HistoryComponent } from './pages/history/history.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -64,7 +71,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     AuthComponent,
     PostesMComponent,
     ModerateurLayoutComponent,
-    HistoryComponent
+    SuppComponent,
+    SuppCommentaireComponent,
+    SuppensionComponent,
+    SuppCatComponent,
+    HistoryComponent,
+   
   ],
   imports: [
     BrowserModule,
@@ -83,10 +95,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatDividerModule,
     MatMenuModule,
     MatBadgeModule,
+    MatSelectModule,
     MatTabsModule,
     MatProgressSpinnerModule,
-    MatSelectModule,
-    LucideAngularModule.pick({ Users, Newspaper, FolderTree, Shield, MessageSquare, MessageSquareLock, File, Calendar, Coins, XCircle, Search, SearchX, Filter, ChevronDown, ChevronLeft, ChevronRight, CheckCircle, Eye, EyeOff, Lock, Unlock, X, Mail, Plus, Edit, Trash2, UserMinus, User, Settings, LogOut, RotateCw, Flag, ThumbsUp, ThumbsDown })
+    LucideAngularModule.pick({ Users, Newspaper, FolderTree, Shield, MessageSquare, MessageSquareLock, File, Calendar, Coins, XCircle, Search, SearchX, Filter, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CheckCircle, Eye, EyeOff, Lock, Unlock, X, Mail, Plus, Edit, Trash2, UserMinus, UserCheck, User, Settings, LogOut, RotateCw, Flag, ThumbsUp, ThumbsDown, AlertCircle, Quote, ArrowLeft, ShieldOff, ShieldAlert, UserX })
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
@@ -94,3 +106,4 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+

@@ -13,15 +13,16 @@ import { AdminUsersComponent } from './pages/admin-users/admin-users.component';
 import { ProfilComponent } from './pages/profil/profil.component';
 import { ModerateurLayoutComponent } from './pages/moderateur-layout/moderateur-layout.component';
 import { PostesMComponent } from './pages/postes-m/postes-m.component';
-
+import { SuppensionComponent } from './suppension/suppension.component';
 import { HistoryComponent } from './pages/history/history.component';
 
+
 const routes: Routes = [
-  { path: '', component: IndexComponent }, 
-  { path: 'history', component: HistoryComponent, canActivate: [AuthGuard] },
+  { path: '', component: IndexComponent }, // page publique
+
+   { path: 'history', component: HistoryComponent, canActivate: [AuthGuard] },
 
   { path: 'profile', component: ProfilComponent, canActivate: [AuthGuard] },
-// page publique
   {
     path: '',
     component: AuthComponent,
@@ -30,6 +31,7 @@ const routes: Routes = [
       { path: 'register', component: RegisterComponent },
     ]
   },
+  { path: 'suppension', component: SuppensionComponent },
   {
     path: 'admin',
     component: AdminLayoutComponent,

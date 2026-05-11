@@ -1,74 +1,40 @@
-<footer class="forum-footer">
-  <div class="container">
-
-    <!-- TOP -->
-    <div class="footer-top">
-      <div class="footer-brand">
-        <i class="fa-solid fa-user-secret logo"></i>
-        <div>
-          <h2>Forum Anonyme</h2>
-          <p>Un espace sécurisé pour discuter librement.</p>
-        </div>
-      </div>
+<footer class="ff">
+  <div class="ff-brand">
+    <div class="ff-brand-icon">
+      <i class="ti ti-spy"></i>
     </div>
-
-    <!-- GRID -->
-    <div class="footer-grid">
-
-      <!-- À propos -->
-      <div class="footer-col">
-        <h4><i class="fa-solid fa-circle-info"></i> À propos</h4>
-        <p>Plateforme de discussion anonyme, simple et sécurisée.</p>
-      </div>
-
-      <!-- Navigation -->
-      <div class="footer-col">
-        <h4><i class="fa-solid fa-compass"></i> Navigation</h4>
-        <ul>
-          <li><a routerLink="/">Accueil</a></li>
-          <li><a routerLink="/login">Connexion</a></li>
-          <li><a routerLink="/register">Inscription</a></li>
-        </ul>
-      </div>
-
-      <!-- Règles -->
-      <div class="footer-col">
-        <h4><i class="fa-solid fa-scale-balanced"></i> Règles</h4>
-        <ul>
-          <li>Respect</li>
-          <li>Confidentialité</li>
-          <li>Contenu approprié</li>
-        </ul>
-      </div>
-
-    <!-- Contact / CTA -->
-<div class="footer-col">
-  <h4>
-    <i class="fa-solid fa-bolt"></i> Commencer
-  </h4>
-
-  <div class="footer-buttons">
-
-    <a routerLink="/login" class="btn primary">
-      <i class="fa-solid fa-right-to-bracket"></i>
-      Connexion
-    </a>
-
-    <a routerLink="/register" class="btn secondary">
-      <i class="fa-solid fa-user-plus"></i>
-      Inscription
-    </a>
-
+    <div>
+      <p class="ff-brand-name">Forum Anonyme</p>
+      <p class="ff-brand-sub">Un espace sécurisé pour discuter librement.</p>
+    </div>
   </div>
-</div>
 
+  <div class="ff-grid">
+    <div class="ff-col">
+      <p class="ff-col-label"><i class="ti ti-info-circle"></i> À propos</p>
+      <p class="ff-col-desc">Plateforme de discussion anonyme, simple et sécurisée.</p>
     </div>
 
-    <!-- BOTTOM -->
-    <div class="footer-bottom">
-      <p>© {{ year }} Forum Anonyme</p>
-     
+    <div class="ff-col">
+      <p class="ff-col-label"><i class="ti ti-compass"></i> Navigation</p>
+      <ul>
+        <li><a routerLink="/">Accueil</a></li>
+        <li><a routerLink="/categories">Catégories</a></li>
+        <li><a routerLink="/tendances">Tendances</a></li>
+      </ul>
     </div>
 
+    <div class="ff-col">
+      <p class="ff-col-label"><i class="ti ti-scale"></i> Règles</p>
+      <div class="ff-rule-item"><i class="ti ti-heart"></i> Respect</div>
+      <div class="ff-rule-item"><i class="ti ti-lock"></i> Confidentialité</div>
+      <div class="ff-rule-item"><i class="ti ti-shield-check"></i> Contenu approprié</div>
+    </div>
+  </div>
+
+  <hr class="ff-divider">
+
+  <div class="ff-bottom">
+    <p class="ff-bottom-copy">© {{ year }} Forum Anonyme — Tous droits réservés</p>
   </div>
 </footer>

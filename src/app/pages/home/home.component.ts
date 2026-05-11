@@ -4,7 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { CategoryFilterService } from '../../services/category-filter.service';
 import { environment } from '../../../environments/environment';
-
+import { ActivatedRoute, Router } from '@angular/router';
 interface Categorie {
   id: number;
   titre: string;
@@ -30,6 +30,7 @@ export class HomeComponent implements OnInit {
   error = '';
   showPostForm = false;
   activeCategoryId: number | null = null;
+  selectedCategoryForPost: number | null = null;
 
   // Pagination
   currentPage = 1;
@@ -39,25 +40,50 @@ export class HomeComponent implements OnInit {
   reactingPosts = new Set<number | string>();
 
   constructor(
-    public auth: AuthService,
-    private http: HttpClient,
-    private categoryFilter: CategoryFilterService
+    
+ public auth: AuthService,
+  private http: HttpClient,
+  private categoryFilter: CategoryFilterService,
+  private route: ActivatedRoute,
+  private router: Router
+
   ) {}
 
+
+
   ngOnInit(): void {
-    this.auth.user$.subscribe((u) => {
-      this.user = u;
-    });
 
-    this.loadPosts();
-    this.loadCategories();
+  this.auth.user$.subscribe(u => {
+    this.user = u;
+  });
 
-    this.categoryFilter.categoryId$.subscribe((id) => {
-      this.activeCategoryId = id;
-      this.currentPage = 1;
+  // ✅ 1. Charger les posts (OBLIGATOIRE)
+  this.loadPosts();
+  this.loadCategories();
+
+  // ✅ 2. Écouter la catégorie depuis l’URL
+  this.route.queryParams.subscribe(params => {
+    this.activeCategoryId = params['category'] !== undefined
+      ? Number(params['category'])   // ✅ CAST NUMBER
+      : null;
+
+    this.currentPage = 1;
+
+    // ✅ appliquer le filtre SEULEMENT si posts chargés
+    if (this.posts.length > 0) {
       this.applyFilter();
-    });
-  }
+    }
+  });
+
+  this.categoryFilter.openPostForm$.subscribe(intent => {
+    if (intent.open) {
+      this.selectedCategoryForPost = intent.categoryId ?? null;
+      this.showPostForm = true;
+      this.error = '';
+    }
+  });
+}
+
 
   @HostListener('document:keydown.escape')
   handleEscape(): void {
@@ -566,6 +592,8 @@ export class HomeComponent implements OnInit {
   closePostModal(): void {
     this.showPostForm = false;
     this.error = '';
+    this.selectedCategoryForPost = null;
+    this.categoryFilter.clearPostFormIntent();
   }
 
   // =========================

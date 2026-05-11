@@ -1,9 +1,12 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
+import { animate, style, transition, trigger } from '@angular/animations';
+
 import { PostService } from '../../services/post.service';
 import { AuthService } from '../../services/auth.service';
 import { DashboardService } from '../../services/dashboard.service';
 import { CommentService } from '../../services/comment.service';
-import { animate, style, transition, trigger } from '@angular/animations';
+import { ModerateurService } from '../../services/moderateur.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-postes-m',
@@ -11,101 +14,137 @@ import { animate, style, transition, trigger } from '@angular/animations';
   styleUrls: ['./postes-m.component.css'],
   animations: [
     trigger('fadeIn', [
-      transition(':enter', [style({ opacity: 0 }), animate('200ms ease-out', style({ opacity: 1 }))]),
-      transition(':leave', [animate('200ms ease-in', style({ opacity: 0 }))])
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('200ms ease-out', style({ opacity: 1 }))
+      ]),
+      transition(':leave', [
+        animate('200ms ease-in', style({ opacity: 0 }))
+      ])
     ]),
     trigger('modalSlide', [
       transition(':enter', [
         style({ transform: 'scale(0.95) translateY(20px)', opacity: 0 }),
-        animate('300ms cubic-bezier(0.34, 1.56, 0.64, 1)', style({ transform: 'scale(1) translateY(0)', opacity: 1 }))
+        animate(
+          '300ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+          style({ transform: 'scale(1) translateY(0)', opacity: 1 })
+        )
       ]),
       transition(':leave', [
-        animate('200ms ease-in', style({ transform: 'scale(0.95) translateY(20px)', opacity: 0 }))
+        animate(
+          '200ms ease-in',
+          style({ transform: 'scale(0.95) translateY(20px)', opacity: 0 })
+        )
+      ])
+    ]),
+    trigger('slideInOut', [
+      transition(':enter', [
+        style({ height: '0px', opacity: 0, overflow: 'hidden' }),
+        animate('300ms ease-out', style({ height: '*', opacity: 1 }))
+      ]),
+      transition(':leave', [
+        animate(
+          '200ms ease-in',
+          style({ height: '0px', opacity: 0, overflow: 'hidden' })
+        )
       ])
     ])
   ]
 })
 export class PostesMComponent implements OnInit {
+
   posts = signal<any[]>([]);
   isLoading = signal(true);
-  searchQuery = signal('');
-  selectedPost = signal<any | null>(null);
-  isViewModalOpen = signal(false);
-  notification = signal<{ message: string, type: 'success' | 'error' | 'info' } | null>(null);
 
-  // Pagination & Filtering Signals
+  // Notification
+  notification = signal<{ type: string; message: string } | null>(null);
+
+  // Filters
+  searchQuery = signal('');
+  statusFilter = signal('all');
+  lockFilter = signal('all');
+  specificDateFilter = signal<string | null>(null);
+  dateSort = signal('recent');
+  isFilterOpen = signal(false);
+
+  // Pagination
   currentPage = signal(1);
   itemsPerPage = 10;
 
-  isFilterOpen = signal(false);
-  statusFilter = signal<'all' | 'visible' | 'hidden'>('all');
-  lockFilter = signal<'all' | 'locked' | 'unlocked'>('all');
-  dateSort = signal<'recent' | 'ancien'>('recent');
-  specificDateFilter = signal<string | null>(null);
+  // View modal
+  selectedPost = signal<any | null>(null);
+  isViewModalOpen = signal(false);
+  isCommentsExpanded = signal(false);
 
-  // Get all posts matching search and filters
-  getFilteredPosts = computed(() => {
-    let results = this.posts();
+  // Delete post modal
+  isDeleteModalOpen = signal(false);
+  postIdToDelete = signal<number | null>(null);
 
-    // 1. Search Query
-    const query = this.searchQuery().toLowerCase();
+  // Delete comment modal
+  isDeleteCommentModalOpen = signal(false);
+  commentIdToDelete = signal<number | null>(null);
+
+  // Suspend modal
+  suspendModalOpen = signal(false);
+  userToSuspend = signal<any | null>(null);
+  suspendReason = signal('');
+  suspendLoading = signal(false);
+
+  filteredPosts = computed(() => {
+    let result = this.posts();
+
+    const query = this.searchQuery().toLowerCase().trim();
     if (query) {
-      results = results.filter(post =>
-        post.titre?.toLowerCase().includes(query) ||
-        post.user?.pseudo?.toLowerCase().includes(query) ||
-        post.categorie?.titre?.toLowerCase().includes(query)
+      result = result.filter((p: any) =>
+        (p.titre?.toLowerCase() || '').includes(query) ||
+        (p.contenu?.toLowerCase() || '').includes(query) ||
+        (p.user?.pseudo?.toLowerCase() || '').includes(query)
       );
     }
 
-    // 2. Status Filter
-    if (this.statusFilter() === 'visible') {
-      results = results.filter(post => !post.is_hidden);
-    } else if (this.statusFilter() === 'hidden') {
-      results = results.filter(post => post.is_hidden);
+    const status = this.statusFilter();
+    if (status !== 'all') {
+      result = result.filter((p: any) =>
+        status === 'hidden' ? p.is_hidden : !p.is_hidden
+      );
     }
 
-    // 3. Lock Filter
-    if (this.lockFilter() === 'locked') {
-      results = results.filter(post => post.is_locked);
-    } else if (this.lockFilter() === 'unlocked') {
-      results = results.filter(post => !post.is_locked);
+    const lock = this.lockFilter();
+    if (lock !== 'all') {
+      result = result.filter((p: any) =>
+        lock === 'locked' ? p.is_locked : !p.is_locked
+      );
     }
 
-    // 4. Date Sorting
-    results = [...results].sort((a, b) => {
-      const dateA = new Date(a.created_at).getTime();
-      const dateB = new Date(b.created_at).getTime();
-      return this.dateSort() === 'recent' ? dateB - dateA : dateA - dateB;
-    });
-
-    // 5. Specific Date Filter
-    if (this.specificDateFilter()) {
-      results = results.filter(post => {
-        if (!post.created_at) return false;
-        const postDate = new Date(post.created_at).toISOString().split('T')[0];
-        return postDate === this.specificDateFilter();
+    const date = this.specificDateFilter();
+    if (date) {
+      result = result.filter((p: any) => {
+        const postDate = p.created_at ? new Date(p.created_at).toISOString().split('T')[0] : '';
+        return postDate === date;
       });
     }
 
-    return results;
+    const sort = this.dateSort();
+    result = [...result].sort((a: any, b: any) => {
+      const dateA = new Date(a.created_at || 0).getTime();
+      const dateB = new Date(b.created_at || 0).getTime();
+      return sort === 'ancien' ? dateA - dateB : dateB - dateA;
+    });
+
+    return result;
   });
 
-  filteredCount = computed(() => this.getFilteredPosts().length);
-  totalPages = computed(() => Math.ceil(this.filteredCount() / this.itemsPerPage));
-  startIndex = computed(() => (this.currentPage() - 1) * this.itemsPerPage);
-  endIndex = computed(() => Math.min(this.startIndex() + this.itemsPerPage, this.filteredCount()));
-
-  // Current page of posts
-  filteredPosts = computed(() => {
-    return this.getFilteredPosts().slice(this.startIndex(), this.endIndex());
+  totalPages = computed(() => {
+    return Math.ceil(this.filteredPosts().length / this.itemsPerPage);
   });
 
   constructor(
     private postService: PostService,
     private authService: AuthService,
     private dashboardService: DashboardService,
-    private commentService: CommentService
-  ) { }
+    private commentService: CommentService,
+    private moderateurService: ModerateurService
+  ) {}
 
   ngOnInit(): void {
     this.loadPosts();
@@ -114,230 +153,264 @@ export class PostesMComponent implements OnInit {
   loadPosts(): void {
     this.isLoading.set(true);
     this.postService.getPosts().subscribe({
-      next: (data) => {
-        // En supposant que l'API retourne un tableau directement ou un objet avec une clé posts
-        this.posts.set(Array.isArray(data) ? data : (data as any).posts || []);
+      next: (data: any) => {
+        this.posts.set(Array.isArray(data) ? data : data.posts || []);
         this.isLoading.set(false);
       },
-      error: (err) => {
-        console.error('Erreur lors du chargement des posts', err);
-        this.isLoading.set(false);
-      }
+      error: () => this.isLoading.set(false)
     });
   }
 
-  onPageChanged(page: number) {
-    this.currentPage.set(page);
-  }
-
-  onSearchQueryChange(value: string) {
+  onSearchQueryChange(value: string): void {
     this.searchQuery.set(value);
     this.currentPage.set(1);
   }
 
-  toggleFilter() {
+  toggleFilter(): void {
     this.isFilterOpen.update(v => !v);
   }
 
-  onStatusFilterChange(value: any) {
+  clearFilters(): void {
+    this.searchQuery.set('');
+    this.statusFilter.set('all');
+    this.lockFilter.set('all');
+    this.specificDateFilter.set(null);
+    this.dateSort.set('recent');
+    this.currentPage.set(1);
+  }
+
+  onStatusFilterChange(value: string): void {
     this.statusFilter.set(value);
     this.currentPage.set(1);
   }
 
-  onLockFilterChange(value: any) {
+  onLockFilterChange(value: string): void {
     this.lockFilter.set(value);
     this.currentPage.set(1);
   }
 
-  onDateSortChange(value: any) {
-    this.dateSort.set(value);
-    this.currentPage.set(1);
-  }
-
-  onSpecificDateFilterChange(value: string) {
+  onSpecificDateFilterChange(value: string): void {
     this.specificDateFilter.set(value || null);
     this.currentPage.set(1);
   }
 
-  clearFilters() {
-    this.searchQuery.set('');
-    this.statusFilter.set('all');
-    this.lockFilter.set('all');
-    this.dateSort.set('recent');
-    this.specificDateFilter.set(null);
-    this.currentPage.set(1);
-    this.isFilterOpen.set(false);
+  onDateSortChange(value: string): void {
+    this.dateSort.set(value);
   }
 
-  openAddModal() {
-    this.showNotification('Fonctionnalité d\'ajout de post bientôt disponible', 'info');
-  }
-
-  deletePost(id: number): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce post ?')) {
-      this.postService.deletePost(id).subscribe({
-        next: () => {
-          this.posts.update(p => p.filter(item => item.id !== id));
-          this.showNotification('Post supprimé avec succès');
-        },
-        error: (err) => {
-          console.error('Erreur lors de la suppression', err);
-          this.showNotification('Erreur lors de la suppression', 'error');
-        }
-      });
-    }
+  getCategoryStyles(categorie: any): any {
+    if (!categorie) return {};
+    const colors: any = {
+      'Développement': { backgroundColor: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe' },
+      'Design': { backgroundColor: '#fdf4ff', color: '#a21caf', borderColor: '#f0abfc' },
+      'Marketing': { backgroundColor: '#fff7ed', color: '#c2410c', borderColor: '#fed7aa' },
+      'Business': { backgroundColor: '#f0fdf4', color: '#15803d', borderColor: '#bbf7d0' },
+      'Technologie': { backgroundColor: '#f8fafc', color: '#475569', borderColor: '#e2e8f0' }
+    };
+    return colors[categorie.titre] || { backgroundColor: '#f8fafc', color: '#475569', borderColor: '#e2e8f0' };
   }
 
   formatDate(dateStr: string): string {
     if (!dateStr) return '';
     const date = new Date(dateStr);
-    const day = date.toLocaleDateString('fr-FR', { day: 'numeric' });
-    const month = date.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '');
-    const year = date.getFullYear();
-    const time = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    return `${day} ${month} ${year}, ${time}`;
+    return date.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
 
-  getCategoryStyles(category: any) {
-    if (!category || !category.color) return {};
-    const color = category.color;
-    return {
-      'background-color': color + '15',
-      'color': color,
-      'border-color': color + '30'
-    };
+  toggleHide(id: number): void {
+    this.postService.toggleHide(id).subscribe({
+      next: () => {
+        this.posts.update(list =>
+          list.map((p: any) => p.id === id ? { ...p, is_hidden: !p.is_hidden } : p)
+        );
+        this.selectedPost.update(p => p && p.id === id ? { ...p, is_hidden: !p.is_hidden } : p);
+        this.notification.set({ type: 'success', message: 'Statut du post mis à jour' });
+        setTimeout(() => this.notification.set(null), 3000);
+      },
+      error: () => {
+        this.notification.set({ type: 'error', message: 'Erreur lors de la mise à jour' });
+        setTimeout(() => this.notification.set(null), 3000);
+      }
+    });
   }
 
-  getRoleStyles(role: string) {
-    let color = '#64748b'; // default slate
-    if (role === 'admin') color = '#7c3aed'; // purple
-    if (role === 'moderateur') color = '#d97706'; // amber/orange
-
-    return {
-      'background-color': color + '15',
-      'color': color,
-      'border-color': color + '30'
-    };
+  toggleLock(id: number): void {
+    this.postService.toggleLock(id).subscribe({
+      next: () => {
+        this.posts.update(list =>
+          list.map((p: any) => p.id === id ? { ...p, is_locked: !p.is_locked } : p)
+        );
+        this.selectedPost.update(p => p && p.id === id ? { ...p, is_locked: !p.is_locked } : p);
+        this.notification.set({ type: 'success', message: 'Verrouillage mis à jour' });
+        setTimeout(() => this.notification.set(null), 3000);
+      },
+      error: () => {
+        this.notification.set({ type: 'error', message: 'Erreur lors de la mise à jour' });
+        setTimeout(() => this.notification.set(null), 3000);
+      }
+    });
   }
 
-  viewPost(postId: number): void {
-    const post = this.posts().find(p => p.id === postId);
+  openDeleteModal(id: number): void {
+    this.postIdToDelete.set(id);
+    this.isDeleteModalOpen.set(true);
+  }
+
+  confirmDeletePost(id: number): void {
+    this.postService.deletePost(id).subscribe({
+      next: () => {
+        this.posts.update(list => list.filter((p: any) => p.id !== id));
+        this.isDeleteModalOpen.set(false);
+        this.postIdToDelete.set(null);
+        if (this.selectedPost()?.id === id) {
+          this.closeViewModal();
+        }
+        this.notification.set({ type: 'success', message: 'Post supprimé' });
+        setTimeout(() => this.notification.set(null), 3000);
+      },
+      error: () => {
+        this.notification.set({ type: 'error', message: 'Erreur lors de la suppression' });
+        setTimeout(() => this.notification.set(null), 3000);
+      }
+    });
+  }
+
+  viewPost(id: number): void {
+    const post = this.posts().find((p: any) => p.id === id);
     if (post) {
       this.selectedPost.set(post);
       this.isViewModalOpen.set(true);
+      this.isCommentsExpanded.set(false);
     }
   }
 
   closeViewModal(): void {
     this.isViewModalOpen.set(false);
-    setTimeout(() => this.selectedPost.set(null), 200);
+    this.selectedPost.set(null);
+    this.isCommentsExpanded.set(false);
   }
 
-  toggleStatus(post: any): void {
-    if (!post.user?.id) return;
+  toggleUserStatus(user: any): void {
+    if (!user) return;
+    if (user.status === 'suspendu') {
+      // Reactivate user - use fallback toggle
+      this.moderateurService.toggleStatusFallback(user.id).subscribe({
+        next: () => {
+          this.posts.update(list =>
+            list.map((p: any) =>
+              p.user?.id === user.id ? { ...p, user: { ...p.user, status: 'actif' } } : p
+            )
+          );
+          this.selectedPost.update(p =>
+            p && p.user?.id === user.id ? { ...p, user: { ...p.user, status: 'actif' } } : p
+          );
+          this.notification.set({ type: 'success', message: 'Utilisateur réactivé' });
+          setTimeout(() => this.notification.set(null), 3000);
+        },
+        error: () => {
+          this.notification.set({ type: 'error', message: 'Erreur lors de la réactivation' });
+          setTimeout(() => this.notification.set(null), 3000);
+        }
+      });
+    } else {
+      // Open suspend modal
+      this.userToSuspend.set(user);
+      this.suspendReason.set('');
+      this.suspendModalOpen.set(true);
+    }
+  }
 
-    this.dashboardService.toggleStatus(post.user.id).subscribe({
-      next: (res) => {
-        // Mettre à jour le statut de l'utilisateur pour tous les posts de cet utilisateur
-        this.posts.update(allPosts =>
-          allPosts.map(p => {
-            if (p.user?.id === post.user.id) {
-              return { ...p, user: { ...p.user, status: res.status } };
-            }
-            return p;
-          })
+  confirmSuspend(): void {
+    const user = this.userToSuspend();
+    const reason = this.suspendReason().trim();
+    if (!user || !reason) return;
+
+    this.suspendLoading.set(true);
+    this.moderateurService.suspend(user.id, reason).subscribe({
+      next: () => {
+        this.posts.update(list =>
+          list.map((p: any) =>
+            p.user?.id === user.id ? { ...p, user: { ...p.user, status: 'suspendu' } } : p
+          )
         );
-        this.showNotification(`Statut de l'utilisateur mis à jour : ${res.status}`);
+        this.selectedPost.update(p =>
+          p && p.user?.id === user.id ? { ...p, user: { ...p.user, status: 'suspendu' } } : p
+        );
+        this.suspendLoading.set(false);
+        this.suspendModalOpen.set(false);
+        this.userToSuspend.set(null);
+        this.suspendReason.set('');
+        this.notification.set({ type: 'success', message: 'Utilisateur suspendu' });
+        setTimeout(() => this.notification.set(null), 3000);
       },
-      error: (err) => {
-        console.error('Erreur toggle status', err);
-        this.showNotification('Erreur lors de la mise à jour du statut', 'error');
+      error: () => {
+        this.suspendLoading.set(false);
+        this.notification.set({ type: 'error', message: 'Erreur lors de la suspension' });
+        setTimeout(() => this.notification.set(null), 3000);
       }
     });
   }
 
-  getInitial(name: string): string {
-    return name ? name.charAt(0).toUpperCase() : 'U';
+  getImageUrl(image: string | null): string {
+    if (!image) return '';
+    if (image.startsWith('http')) return image;
+    const baseUrl = environment.apiUrl.replace(/\/api$/, '');
+    return `${baseUrl}/storage/${image}`;
   }
 
   countLikes(post: any): number {
-    return post.reactions?.filter((r: any) => r.type === 'like').length || 0;
+    if (!post?.reactions) return 0;
+    return post.reactions.filter((r: any) => r.type === 'like').length;
   }
 
   countDislikes(post: any): number {
-    return post.reactions?.filter((r: any) => r.type === 'dislike').length || 0;
+    if (!post?.reactions) return 0;
+    return post.reactions.filter((r: any) => r.type === 'dislike').length;
   }
 
-  getImageUrl(path: string): string {
-    if (!path) return '';
-    if (path.startsWith('http')) return path;
-    // Si le chemin commence par storage/, on ne le rajoute pas
-    const cleanPath = path.startsWith('storage/') ? path.replace('storage/', '') : path;
-    return `http://localhost:8000/storage/${cleanPath}`;
+  getInitial(pseudo: string | undefined): string {
+    return (pseudo?.substring(0, 1) || 'U').toUpperCase();
   }
 
-  showNotification(message: string, type: 'success' | 'error' | 'info' = 'success') {
-    this.notification.set({ message, type });
-    setTimeout(() => this.notification.set(null), 3000);
+  onPageChanged(page: number): void {
+    this.currentPage.set(page);
   }
 
-  deleteComment(commentId: number): void {
-    if (confirm('Supprimer ce commentaire ?')) {
-      this.commentService.deleteComment(commentId).subscribe({
-        next: () => {
-          if (this.selectedPost()) {
-            this.selectedPost.update(p => ({
-              ...p,
-              commentaires: p.commentaires.filter((c: any) => c.id !== commentId)
-            }));
-          }
-          // Update in main list too
-          this.posts.update(all => all.map(p => {
-            if (p.commentaires) {
-              return { ...p, commentaires: p.commentaires.filter((c: any) => c.id !== commentId) };
-            }
-            return p;
-          }));
-          this.showNotification('Commentaire supprimé');
-        },
-        error: (err) => {
-          console.error('Erreur suppression commentaire', err);
-          this.showNotification('Erreur lors de la suppression', 'error');
-        }
-      });
-    }
+  openDeleteCommentModal(id: number): void {
+    this.commentIdToDelete.set(id);
+    this.isDeleteCommentModalOpen.set(true);
   }
 
-  toggleLock(postId: number): void {
-    this.postService.toggleLock(postId).subscribe({
-      next: (res) => {
-        this.updatePostStatus(postId, { is_locked: res.is_locked });
-        this.showNotification(res.message);
+  confirmDeleteComment(id: number): void {
+    this.commentService.deleteComment(id).subscribe({
+      next: () => {
+        this.posts.update(list =>
+          list.map((p: any) =>
+            p.commentaires
+              ? { ...p, commentaires: p.commentaires.filter((c: any) => c.id !== id) }
+              : p
+          )
+        );
+        this.selectedPost.update(p =>
+          p && p.commentaires
+            ? { ...p, commentaires: p.commentaires.filter((c: any) => c.id !== id) }
+            : p
+        );
+        this.isDeleteCommentModalOpen.set(false);
+        this.commentIdToDelete.set(null);
+        this.notification.set({ type: 'success', message: 'Commentaire supprimé' });
+        setTimeout(() => this.notification.set(null), 3000);
       },
-      error: (err) => {
-        console.error('Erreur toggle lock', err);
-        this.showNotification('Erreur lors de la modification', 'error');
+      error: () => {
+        this.notification.set({ type: 'error', message: 'Erreur lors de la suppression' });
+        setTimeout(() => this.notification.set(null), 3000);
       }
     });
-  }
-
-  toggleHide(postId: number): void {
-    this.postService.toggleHide(postId).subscribe({
-      next: (res) => {
-        this.updatePostStatus(postId, { is_hidden: res.is_hidden });
-        this.showNotification(res.message);
-      },
-      error: (err) => {
-        console.error('Erreur toggle hide', err);
-        this.showNotification('Erreur lors de la modification', 'error');
-      }
-    });
-  }
-
-  private updatePostStatus(postId: number, updates: any): void {
-    this.posts.update(all => all.map(p => p.id === postId ? { ...p, ...updates } : p));
-    if (this.selectedPost()?.id === postId) {
-      this.selectedPost.update(p => ({ ...p, ...updates }));
-    }
   }
 }
+

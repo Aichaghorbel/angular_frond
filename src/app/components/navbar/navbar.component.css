@@ -98,7 +98,13 @@
 
 .notif-btn mat-icon {
   font-size: 22px;
+  width: 22px;
+  height: 22px;
   color: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
 }
 
 .notif-count {
@@ -152,6 +158,18 @@
   border-bottom: none;
 }
 
+.notif-row mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  flex-shrink: 0;
+  color: #111827;
+}
+
 .notif-message {
   flex: 1;
   font-size: 14px;
@@ -171,7 +189,13 @@
 
 .notif-delete mat-icon {
   font-size: 20px;
+  width: 20px;
+  height: 20px;
   color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
 }
 
 .notif-empty {

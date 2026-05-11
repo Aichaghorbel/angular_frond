@@ -3,7 +3,7 @@
   <!-- ================= HEADER PROFIL ================= -->
   <section class="profile-header">
     <div class="cover-photo">
-      <img src="assets/images/conv1.png" alt="Cover">
+      <img src="assets/images/1.jpg" alt="Cover">
     </div>
 
     <div class="header-content">
@@ -14,12 +14,7 @@
             <span *ngIf="!user.avatar">{{ user.name[0] }}</span>
           </div>
         </div>
-        <button
-          mat-icon-button
-          class="avatar-btn"
-          (click)="avatarInput.click()">
-          <mat-icon>photo_camera</mat-icon>
-        </button>
+        
         <input type="file" hidden #avatarInput>
       </div>
 
@@ -73,17 +68,23 @@
             </div>
 
             <div class="input-group">
-              <label class="input-label">Adresse email</label>
-              <div class="input-wrap">
-                <mat-icon class="input-icon">email</mat-icon>
-                <input
-                  type="email"
-                  [(ngModel)]="user.email"
-                  name="email"
-                  class="native-input"
-                  placeholder="Votre adresse email">
-              </div>
+            <label class="input-label">Adresse email</label>
+            <div class="input-wrap">
+              <mat-icon class="input-icon">email</mat-icon>
+              <input
+                type="email"
+                [value]="user.email"
+                name="email"
+                class="native-input"
+                placeholder="Votre adresse email"
+                readonly
+                style="opacity: 0.6; cursor: not-allowed; background: #f1f5f9;"
+              />
             </div>
+            <small style="color: #94a3b8; font-size: 12px; margin-top: 4px; display: block;">
+              L'adresse email ne peut pas être modifiée.
+            </small>
+          </div>
 
             <div class="card-actions">
               <button mat-flat-button color="primary" type="submit">
@@ -298,4 +299,3 @@
 
   </section>
 </div>
-

@@ -57,6 +57,7 @@
             [categories]="categories"
             [posting]="posting"
             [error]="error || ''"
+            [selectedCategoryId]="selectedCategoryForPost"
             (submitPost)="createPost($event)"
             (cancel)="closePostModal()">
           </app-post-form>
@@ -149,7 +150,7 @@
                 <span>{{ countLikes(post) }}</span>
               </button>
 
-               <button
+              <button
                 class="icon-btn comment-btn"
                 [class.locked]="post.is_locked"
                 [class.no-click]="post.is_locked && countComments(post) === 0"

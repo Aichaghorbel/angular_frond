@@ -1,6 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { animate, style, transition, trigger } from '@angular/animations';
-import { DashboardService, DashboardStats } from '../../services/dashboard.service';
+import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
+import { DashboardService } from '../../services/dashboard.service';
+import { Chart, registerables } from 'chart.js';
+
+Chart.register(...registerables);
 
 interface Stat {
   label: string;
@@ -8,192 +10,292 @@ interface Stat {
   icon: string;
   color: string;
   bg: string;
-  fill?: boolean;
-}
-
-interface ChartData {
-  name: string;
-  inscrits: number;
 }
 
 @Component({
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
-  styleUrls: ['./admin-dashboard.component.css'],
-  animations: [
-    trigger('fadeInUp', [
-      transition(':enter', [
-        style({ opacity: 0, transform: 'translateY(10px)' }),
-        animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
-      ])
-    ])
-  ]
+  styleUrls: ['./admin-dashboard.component.css']
 })
-export class AdminDashboardComponent implements OnInit {
-  chartTab = signal<'semaine' | 'mois'>('semaine');
+export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loading = true;
   error = false;
 
+  activeUsersTab: 'semaine' | 'mois' = 'semaine';
+  activePostsTab: 'semaine' | 'mois' = 'semaine';
+
   stats: Stat[] = [
-    { label: 'Utilisateurs', value: '0', icon: 'users', color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Posts', value: '0', icon: 'newspaper', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Catégories', value: '0', icon: 'folder-tree', color: 'text-amber-500', bg: 'bg-amber-50' },
-    { label: 'Modérateurs', value: '0', icon: 'users', color: 'text-purple-600', bg: 'bg-purple-50' }
+    { label: 'Utilisateurs', value: '0', icon: 'people',      color: 'text-blue-600',    bg: 'bg-blue-50'    },
+    { label: 'Posts',        value: '0', icon: 'article',     color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'Catégories',  value: '0', icon: 'folder',      color: 'text-amber-500',   bg: 'bg-amber-50'   },
+    { label: 'Modérateurs', value: '0', icon: 'shield',       color: 'text-purple-600',  bg: 'bg-purple-50'  }
   ];
 
-  weeklyData: ChartData[] = [];
-  monthlyData: ChartData[] = [];
-  activityData: { name: string, posts: number }[] = [];
-
   moderateurs: any[] = [];
+  categoriesPercent: { name: string; percent: number }[] = [];
 
+  weeklyUsers:  { name: string; inscrits: number }[] = [];
+  monthlyUsers: { name: string; inscrits: number }[] = [];
+  weeklyPosts:  { name: string; posts: number }[] = [];
+  monthlyPosts: { name: string; posts: number }[] = [];
 
-  categories: {name: string, percent: number, color: string}[] = [];
+  private usersChart: Chart | null = null;
+  private postsChart: Chart | null = null;
+  private categoryChart: Chart | null = null;
 
-  constructor(private dashboardService: DashboardService) { }
+  private dataLoaded = false;
+  private viewReady  = false;
+
+  constructor(private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
     this.dashboardService.getDashboardFull().subscribe({
       next: (data) => {
-        // 1. Summary Stats
         this.stats[0].value = data.summary.users.toLocaleString();
         this.stats[1].value = data.summary.posts.toLocaleString();
         this.stats[2].value = data.summary.categories.toLocaleString();
         this.stats[3].value = data.summary.moderateurs.toLocaleString();
 
-        // 2. Charts
-        this.weeklyData = data.usersChart.semaine;
-        this.monthlyData = data.usersChart.mois;
-        this.activityData = data.postsChart.semaine;
-
-        // 3. Categories
-        this.categories = data.categoriesPercent;
-
-        // 4. Moderators
+        this.weeklyUsers  = data.usersChart.semaine;
+        this.monthlyUsers = data.usersChart.mois;
+        this.weeklyPosts  = data.postsChart.semaine;
+        this.monthlyPosts = data.postsChart.mois;
+        this.categoriesPercent = data.categoriesPercent;
         this.moderateurs = data.moderateurs;
 
         this.loading = false;
+        this.dataLoaded = true;
+        if (this.viewReady) this.renderAllCharts();
       },
-      error: (err) => {
-        console.error('Erreur lors du chargement des données consolidées', err);
-        this.error = true;
-        this.loading = false;
+      error: () => { this.error = true; this.loading = false; }
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.viewReady = true;
+    if (this.dataLoaded) this.renderAllCharts();
+  }
+
+  ngOnDestroy(): void {
+    this.usersChart?.destroy();
+    this.postsChart?.destroy();
+    this.categoryChart?.destroy();
+  }
+
+  // =========================
+  // RENDER ALL
+  // =========================
+  private renderAllCharts(): void {
+    setTimeout(() => {
+      this.renderUsersChart();
+      this.renderPostsChart();
+      this.renderCategoryChart();
+    }, 100);
+  }
+
+  // =========================
+  // USERS CHART (Line)
+  // =========================
+  private renderUsersChart(): void {
+    const canvas = document.getElementById('usersChart') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    this.usersChart?.destroy();
+
+    const data = this.activeUsersTab === 'semaine' ? this.weeklyUsers : this.monthlyUsers;
+
+    this.usersChart = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: data.map(d => d.name),
+        datasets: [{
+          label: 'Utilisateurs inscrits',
+          data: data.map(d => d.inscrits),
+          borderColor: '#2563eb',
+          backgroundColor: 'rgba(37, 99, 235, 0.08)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#2563eb',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#ffffff',
+            titleColor: '#64748b',
+            bodyColor: '#1e293b',
+            borderColor: '#e2e8f0',
+            borderWidth: 1,
+            padding: 12,
+            cornerRadius: 12,
+            callbacks: {
+              label: (ctx) => ` ${ctx.parsed.y} utilisateur(s)`
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: '#94a3b8', font: { size: 12 } }
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: '#f1f5f9' },
+            ticks: {
+              color: '#94a3b8',
+              font: { size: 12 },
+              stepSize: 1,
+              callback: (v) => Number.isInteger(v) ? v : ''
+            }
+          }
+        }
       }
     });
   }
 
-  activeData() {
-    return this.chartTab() === 'semaine' ? this.weeklyData : this.monthlyData;
-  }
+  // =========================
+  // POSTS CHART (Bar)
+  // =========================
+  private renderPostsChart(): void {
+    const canvas = document.getElementById('postsChart') as HTMLCanvasElement;
+    if (!canvas) return;
 
-  chartMax(): number {
-    const data = this.activeData();
-    if (!data || data.length === 0) return 4;
-    const maxVal = Math.max(...data.map(d => d.inscrits), 0);
-    if (maxVal === 0) return 4;
-    // Calculate a nice max value (e.g., nearest multiple of 4 or 10 above the actual max)
-    const power = Math.pow(10, Math.floor(Math.log10(maxVal)));
-    const fraction = maxVal / power;
-    let niceFraction = 1;
-    if (fraction <= 1) niceFraction = 1;
-    else if (fraction <= 2) niceFraction = 2;
-    else if (fraction <= 5) niceFraction = 5;
-    else niceFraction = 10;
-    
-    let niceMax = niceFraction * power;
-    if (niceMax < 4) niceMax = 4;
-    
-    // Ensure it's easily divisible by 4 for the 5 labels
-    return Math.ceil(niceMax / 4) * 4;
-  }
+    this.postsChart?.destroy();
 
-  yAxisLabels(): number[] {
-    const max = this.chartMax();
-    return [max, max * 0.75, max * 0.5, max * 0.25, 0];
-  }
+    const data = this.activePostsTab === 'semaine' ? this.weeklyPosts : this.monthlyPosts;
 
-  chartAreaPath(): string {
-    const data = this.activeData();
-    if (!data || data.length < 2) return '';
-    const width = 800, height = 250;
-    const max = this.chartMax();
-    let path = '';
-    
-    data.forEach((d, i) => {
-      const x = (i / (data.length - 1)) * width;
-      const y = height - (d.inscrits / max) * height;
-      
-      if (i === 0) {
-        path += `M ${x} ${y}`;
-      } else {
-        const prevX = ((i - 1) / (data.length - 1)) * width;
-        const prevY = height - (data[i - 1].inscrits / max) * height;
-        const cp1x = (prevX + x) / 2;
-        const cp2x = (prevX + x) / 2;
-        path += ` C ${cp1x} ${prevY}, ${cp2x} ${y}, ${x} ${y}`;
+    this.postsChart = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: data.map(d => d.name),
+        datasets: [{
+          label: 'Posts publiés',
+          data: data.map(d => d.posts),
+          backgroundColor: 'rgba(139, 92, 246, 0.15)',
+          borderColor: '#8b5cf6',
+          borderWidth: 2,
+          borderRadius: 8,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#ffffff',
+            titleColor: '#64748b',
+            bodyColor: '#1e293b',
+            borderColor: '#e2e8f0',
+            borderWidth: 1,
+            padding: 12,
+            cornerRadius: 12,
+            callbacks: {
+              label: (ctx) => ` ${ctx.parsed.y} post(s)`
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: '#94a3b8', font: { size: 12 } }
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: '#f1f5f9' },
+            ticks: {
+              color: '#94a3b8',
+              font: { size: 12 },
+              stepSize: 1,
+              callback: (v) => Number.isInteger(v) ? v : ''
+            }
+          }
+        }
       }
     });
-    
-    return `${path} L 800 250 L 0 250 Z`;
   }
 
-  chartPath(): string {
-    const data = this.activeData();
-    if (!data || data.length < 2) return '';
-    const width = 800, height = 250;
-    const max = this.chartMax();
-    let path = '';
-    
-    data.forEach((d, i) => {
-      const x = (i / (data.length - 1)) * width;
-      const y = height - (d.inscrits / max) * height;
-      
-      if (i === 0) {
-        path += `M ${x} ${y}`;
-      } else {
-        const prevX = ((i - 1) / (data.length - 1)) * width;
-        const prevY = height - (data[i - 1].inscrits / max) * height;
-        const cp1x = (prevX + x) / 2;
-        const cp2x = (prevX + x) / 2;
-        path += ` C ${cp1x} ${prevY}, ${cp2x} ${y}, ${x} ${y}`;
+  // =========================
+  // CATEGORY CHART (Doughnut)
+  // =========================
+  private renderCategoryChart(): void {
+    const canvas = document.getElementById('categoryChart') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    this.categoryChart?.destroy();
+
+    if (!this.categoriesPercent.length) return;
+
+    const colors = [
+      '#2563eb', '#8b5cf6', '#10b981', '#f59e0b',
+      '#ef4444', '#06b6d4', '#ec4899', '#64748b'
+    ];
+
+    this.categoryChart = new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels: this.categoriesPercent.map(c => c.name),
+        datasets: [{
+          data: this.categoriesPercent.map(c => c.percent),
+          backgroundColor: colors.slice(0, this.categoriesPercent.length),
+          borderWidth: 0,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '70%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: '#475569',
+              font: { size: 12, weight: 'bold' },
+              padding: 16,
+              usePointStyle: true,
+              pointStyleWidth: 10
+            }
+          },
+          tooltip: {
+            backgroundColor: '#ffffff',
+            titleColor: '#64748b',
+            bodyColor: '#1e293b',
+            borderColor: '#e2e8f0',
+            borderWidth: 1,
+            padding: 12,
+            cornerRadius: 12,
+            callbacks: {
+              label: (ctx) => ` ${ctx.label} : ${ctx.parsed}%`
+            }
+          }
+        }
       }
     });
-    
-    return path;
   }
 
-  setChartTab(tab: 'semaine' | 'mois') {
-    this.chartTab.set(tab);
+  // =========================
+  // TAB SWITCH
+  // =========================
+  setUsersTab(tab: 'semaine' | 'mois'): void {
+    this.activeUsersTab = tab;
+    this.renderUsersChart();
   }
 
-  getBarHeight(posts: number): number {
-    const max = this.barChartMax();
-    const height = (posts / max) * 100;
-    return height < 5 && posts > 0 ? 5 : height;
-  }
-
-  barChartMax(): number {
-    if (!this.activityData || this.activityData.length === 0) return 40;
-    const maxVal = Math.max(...this.activityData.map(d => d.posts), 0);
-    if (maxVal === 0) return 40; // default max if no posts
-    
-    const power = Math.pow(10, Math.floor(Math.log10(maxVal)));
-    const fraction = maxVal / power;
-    let niceFraction = 1;
-    if (fraction <= 1) niceFraction = 1;
-    else if (fraction <= 2) niceFraction = 2;
-    else if (fraction <= 5) niceFraction = 5;
-    else niceFraction = 10;
-    
-    let niceMax = niceFraction * power;
-    if (niceMax < 4) niceMax = 4;
-    
-    return Math.ceil(niceMax / 4) * 4;
-  }
-
-  barYAxisLabels(): number[] {
-    const max = this.barChartMax();
-    return [max, max * 0.75, max * 0.5, max * 0.25, 0];
+  setPostsTab(tab: 'semaine' | 'mois'): void {
+    this.activePostsTab = tab;
+    this.renderPostsChart();
   }
 }
