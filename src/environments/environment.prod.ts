@@ -1,5 +1,5 @@
-// src/environments/environment.prod.ts
+
 export const environment = {
   production: true,
-  apiUrl: 'https://ton-api-production.com/api'
-}
+  apiUrl: 'https://api-laravel-5f5a.onrender.com/api'
+};
