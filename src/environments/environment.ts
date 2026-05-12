@@ -1,5 +1,5 @@
-// src/environments/environment.ts
+
 export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:8000/api'
+  production: true,
+  apiUrl: 'https://api-laravel-5f5a.onrender.com/api'
 };
